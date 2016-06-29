@@ -1,34 +1,36 @@
 var JSX = require('node-jsx').install(),
 	React = require('react'),
   ZendeskApp = require('./components/ZendeskApp.react'),
-  Ticket = require('./models/Ticket');
+  Metadata = require('./models/Metadata'),
+  Tickets = require('./models/TicketsNMDB');
 
 module.exports = 
 {
   index: function(req, res) 
   {
-    Ticket.getTickets(0,0, function(tickets, pages) 
-    {
+    Tickets.getTickets(0, {}, function (err, tickets) {
       var markup = React.renderComponentToString(
         ZendeskApp(
         {
-          tickets: tickets
+          start_time: Metadata.start_time,
+          tickets: tickets,
+          pages: Tickets.getPages(),
         })
       );
 
       res.render('home', 
       {
         markup: markup, // Pass rendered react markup
-        state: JSON.stringify(tickets) // Pass current state to client side
+        //state: JSON.stringify(Tickets.tickets) // Pass current state to client side
       });
     });
   },
 
   page: function(req, res) 
   {
-    Ticket.getTickets(req.params.page, req.params.skip, function(tickets) 
+    Tickets.getTickets(req.params.page, {}, function(err, tickets) 
     {
-		  res.send(tickets);
+      if (!err) res.send(tickets);
     });
   }
 }

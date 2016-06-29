@@ -1,0 +1,12 @@
+# Ignore DB #
+#############
+storage/
+
+# Ignore Modules #
+##################
+node_modules/
+
+# Ignore Logs & Files #
+#######################
+*.log
+*.json

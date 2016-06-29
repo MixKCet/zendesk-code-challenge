@@ -5,7 +5,38 @@ var express = require('express'),
   mongoose = require('mongoose'),
   zendesk = require('node-zendesk'),
   routes = require('./routes'),
-  config = require('./config');
+  config = require('./config'),
+  TicketsNMDB = require('./models/TicketsNMDB'),
+  Metadata = require('./models/Metadata');
+
+var client_username = "";
+var client_password = "";
+
+// Gather Zendesk Client user variables from command args
+process.argv.forEach((val, index, array) => {
+  if (val == "--password" || val == "-p")
+  {
+    if (array.length >= index)
+    {
+      client_password = array[index+1];
+    }
+  }
+  if (val == "--username" || val == "-u")
+  {
+    if (array.length >= index)
+    {
+      client_username = array[index+1];
+    }
+  }
+});
+
+// Check to ensure client details have been supplied
+if (!client_username || !client_password)
+{
+  var err = new Error("The server needs both a client and password. See the README.");
+  console.log(err);
+  return;
+}
 
 // Create an express instance and set a port variable
 var app = express();
@@ -18,11 +49,15 @@ app.set('view engine', 'handlebars');
 // Disable etag headers on responses
 app.disable('etag');
 
-// Connect to our mongo database
-mongoose.connect('mongodb://localhost/zendesk-challenge');
+// Connect to our Ticket mongoDB (DISABLED FOR NOW)
+// mongoose.connect('mongodb://localhost/zendesk-challenge');
+
+var zendeskLogin = config.zendesk;
+zendeskLogin.username = client_username;
+zendeskLogin.password = client_password;
 
 // Create a new Zendesk client instance
-var client = zendesk.createClient(config.zendesk);
+var client = zendesk.createClient(zendeskLogin);
 
 // Index Route
 app.get('/', routes.index);
@@ -43,43 +78,45 @@ var server = http.createServer(app).listen(port, function()
 var io = require('socket.io').listen(server);
 
 // Setup MongoDB
-var start_time = 0;
 function getTickets(start_time)
 {
   client.tickets.incremental(start_time, function (err, statusList, body, responseList, resultList) 
   {
-    if (err || !body.tickets || !body.end_time) 
+    if (err || !resultList.tickets || !resultList.end_time) 
     {
       return;
     }
 
-    start_time = body.end_time;
+    tickets = [];
 
-    body.forEach(function (ticket) {
-      var mongoTicket = {
-        id: body['id'],
-      };
-      var ticketEntry = new Ticket(ticket);
-      ticketEntry.save(function(err) {
-        if (!err) 
-        {
-          tickets.push(ticketEntry);
-        }
+    resultList.tickets.forEach(function (ticket) {
+      TicketsNMDB.addTicket(ticket, { modify: true } , function (err) {
+        if (!err) tickets.push(ticket);
       });
     });
+
+    Metadata.start_time = resultList.end_time + 1;
+
+    TicketsNMDB.save(function (err) {
+      if (!err) Metadata.save();
+    })
     
-    if (!tickets)
+    if (tickets.length > 0)
     {
+      console.log("We retrieved", tickets.length, "new tickets.");
       io.emit('tickets', tickets);
     }
   });
 }
 
-getTickets(start_time);
+// Get all Tickets since the last time server.js was run
+getTickets(Metadata.start_time);
 
 // Setup a 1 second heartbeat
-var heart = heartbeats.createHeart(1000);
+var heart = heartbeats.createHeart(10000);
 heart.createEvent(1, function(heartbeat, last) 
 {
-  getTickets(start_time);
+  console.log("The server's heart beat!");
+  getTickets(Metadata.start_time);
+  console.log("New Page #:", TicketsNMDB.getPages());
 });
