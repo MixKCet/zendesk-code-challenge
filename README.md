@@ -16,8 +16,10 @@ In the app's root directory run the NPM BUILD command. This will run an NPM INST
 Once the installation of node modules is complete and the tests have run, the NPM START command will run the 'server.js' file. As with 'mongod', consider appending & to run this in the background.
 
 When the server is run with NPM START, two parametres must be passed:
+```
 --username <username>
 --password <password>
+```
 
 These two parametres will enable the server to perform API transactions.
 
