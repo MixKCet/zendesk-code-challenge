@@ -14,8 +14,9 @@ function Metadata() {
 	}
 	catch (e)
 	{
-		this.data = default_JSON;
+		this.data = {};
 	}
+	this.data.start_time = this.data.start_time | default_JSON.start_time;
 }
 
 Object.defineProperties(Metadata.prototype, {

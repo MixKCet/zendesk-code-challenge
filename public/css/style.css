@@ -1,0 +1,96 @@
+*
+{
+    box-sizing: border-box;
+}
+
+body
+{
+    font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
+
+    margin: 0;
+    padding: 0 0 40px 0;
+
+    color: white;
+    background: #2c3e50;
+}
+
+.tickets {
+    margin-top: 20px;
+}
+
+.ticket {
+    color: black;
+    background: white;
+}
+
+.loader
+{
+    text-align: center;
+}
+
+.loader.top
+{
+    min-height: 0;
+    margin-top: 0;
+}
+
+.loader.active
+{
+    min-height: auto;
+    margin-top: 0;
+}
+
+.loader img
+{
+    max-height: 0;
+    margin: 0;
+
+    -webkit-transition: 1s all ease;
+       -moz-transition: 1s all ease;
+        -ms-transition: 1s all ease;
+         -o-transition: 1s all ease;
+            transition: 1s all ease;
+}
+
+.loader.active img
+{
+    max-height: 50px;
+    margin: 0px auto 100px;
+}
+
+.loader.active.top img
+{
+    max-height: 50px;
+    margin: 20px auto 10px;
+}
+
+.notification-bar
+{
+    font-size: 13px;
+    font-weight: bold;
+
+    position: fixed;
+    top: -60px;
+
+    width: 100%;
+
+    -webkit-transition: 300ms top ease;
+       -moz-transition: 300ms top ease;
+        -ms-transition: 300ms top ease;
+         -o-transition: 300ms top ease;
+            transition: 300ms top ease;
+    text-align: center;
+
+    color: white;
+    background: rgba(241, 196, 15,.9);
+}
+.notification-bar.active
+{
+    top: 0;
+}
+
+.notification-bar a
+{
+    color: white;
+    cursor: pointer;
+}

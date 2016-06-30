@@ -1,12 +1,9 @@
 /** @jsx React.DOM */
 
 var React = require('react');
-var ZendeskApp = require('./components/ZendeskApp.react');
+var ReactDOM = require('react-dom');
+var ZendeskApp = React.createFactory(require('./components/ZendeskApp.react'));
 
 var initialState = JSON.parse(document.getElementById('initial-state').innerHTML)
 
-React.renderComponent
-(
-  <ZendeskApp tweets={initialState}/>,
-  document.getElementById('react-app')
-);
+ReactDOM.render(ZendeskApp(initialState), document.getElementById('react-app'));
