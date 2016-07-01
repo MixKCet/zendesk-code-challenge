@@ -84,6 +84,7 @@ body
     color: white;
     background: rgba(241, 196, 15,.9);
 }
+
 .notification-bar.active
 {
     top: 0;
@@ -93,4 +94,47 @@ body
 {
     color: white;
     cursor: pointer;
+}
+
+.row-data
+{
+    cursor: pointer;
+}
+
+.table-tickets
+{
+    background-color: white;
+    color: black;
+  -webkit-border-radius: 10px;
+     -moz-border-radius: 10px;
+          border-radius: 10px;
+}
+
+.no-border
+{
+    border: none;
+}
+
+.border-bottom-left
+{
+    border-bottom-left-radius: 10px !important;
+}
+
+.border-bottom-right
+{
+    border-bottom-right-radius: 10px !important;
+}
+
+
+.border-bottom-round
+{
+    border-bottom-right-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+}
+
+.hidden-row
+{
+    padding: 0 !important;
+    overflow: auto;
+    border-top: none !important;
 }

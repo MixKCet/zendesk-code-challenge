@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require('react');
+var CustomDate = require('../models/CustomDate');
 
 module.exports = Ticket = React.createClass({
   render: function() {
@@ -27,34 +28,23 @@ module.exports = Ticket = React.createClass({
       status_class = "label-danger";
     }
 
+    var created_at = new CustomDate(ticket.created_at);
+    var updated_at = new CustomDate(ticket.updated_at);
+
     return (
-      <div className="ticket list-item panel panel-default">
-        <div className="panel-body">
-          <div className="row col-sm-12">
-            <div className="col-sm-3">
-              <span className={"label " + status_class}>
-              {ticket.status}
-              </span>
-            </div>
-            <div className="col-sm-3">
-              <span>Ticket {ticket.id}</span>
-            </div>
-            <div className="col-sm-3">
-              <span>{ticket.created_at}</span>
-            </div>
-          </div>
-          <div className="row col-sm-12">
-            <div className="col-sm-12">
-              <span>{ticket.description}</span>
-            </div>
-          </div>
-          <div className="row col-sm-12">
-            <div className="col-sm-3">
-              {ticket.recipient}
-            </div>
-          </div>
-        </div>
-      </div>
+      <tr data-toggle="collapse" data-target={"#collapse_" + ticket.id} className="accordian-toggle row-data border-bottom-round">
+        <th scope="row" className="border-bottom-left">{ticket.id}</th>
+        <td>
+          <span className={"label " + status_class}>
+            {ticket.status}
+          </span>
+        </td>
+        <td>{ticket.subject}</td>
+        <td>{ticket.requester}</td>
+        <td>{created_at.getPrettyString()}</td>
+        <td>{updated_at.getPrettyString()}</td>
+        <td className="border-bottom-right">{ticket.group}</td>
+      </tr>
     )
   }
 });

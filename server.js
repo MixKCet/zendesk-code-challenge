@@ -15,7 +15,7 @@ var debug = false;
 
 var RATE  = (60000 + 1000) / 10;
 
-// Gather Zendesk Client user variables from command args
+// We gather Zendesk client args from the process.
 process.argv.forEach((val, index, array) => {
 	if (val == "--password" || val == "-p")
 	{
@@ -37,7 +37,6 @@ process.argv.forEach((val, index, array) => {
 	}
 });
 
-// Check to ensure client details have been supplied
 if (!client_username || !client_password)
 {
 	var err = new Error("The server needs both a client and password. See the README.");
@@ -45,43 +44,56 @@ if (!client_username || !client_password)
 	return;
 }
 
-// Create an express instance and set a port variable
+// Our express app is essentially our local server, running on a given port or 
+// 8080. The port is supplied in package.json
 var app = express();
 var port = process.env.PORT || 8080;
 
-// Set handlebars as the templating engine
+// We're using handlebars for data-binding & rendering of our HTML files.
 app.engine('handlebars', exphbs({ defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-// Disable etag headers on responses
+// We don't need etag overhead. We're using a RESTful service and React to manage 
+// our state!
 app.disable('etag');
-
-// Connect to our Ticket mongoDB (DISABLED FOR NOW)
-// mongoose.connect('mongodb://localhost/zendesk-challenge');
 
 var zendeskLogin = config.zendesk;
 zendeskLogin.username = client_username;
 zendeskLogin.password = client_password;
 
-// Create a new Zendesk client instance
+// We'll make all our API calls through this Zendesk client. See:
+// https://github.com/blakmatrix/node-zendesk
 var client = zendesk.createClient(zendeskLogin);
 
-// Index Route
+// We enable side-loading for Groups and Users.
+client.tickets.sideLoad = ['users', 'groups'];
+
+// We set up an index route for serving of our React App.
 app.get('/', routes.index);
 
-// Set /public as our static content dir
+// We set our /public as our static content dir.
+// We'll pre-populate this directory using NPM BUILD, so that index ^ can
+// access the JS it needs.
 app.use("/", express.static(__dirname + "/public/"));
 
-// Fire it up (start our server)
+// This starts our server.
 var server = http.createServer(app).listen(port, function() 
 {
 	console.log('The express server listening on port ' + port);
 });
 
-// Initialize socket.io
+// Other than serving static files with frontend dynamic content, we also
+// care about requests. We handle these requests here to ensure our React
+// page updates dynamically.
+//
+// There are pros-and-cons to socket.io over AJAX, we discuss them in the
+// README.
 var io = require('socket.io').listen(server);
 io.on('connection', function(sockect) {
-	// console.log("connected user");
+
+	// These are two types of Ticket updates.
+	// requestMore: backlog of Ticket data from a given Ticket ID.
+	// requestNewTickets: new Tickets with a given # of Tickets.
 	sockect.on("requestMore", function (data) {
 		var ticketID = data.ticketID;
 		var pageSize = data.pageSize;
@@ -102,11 +114,12 @@ io.on('connection', function(sockect) {
 	});
 });
 
-// Init + Update JSON File of Tickets
-var debug_heartbeats = 0;
+// We wrap our API call here to ensure proper two-phase commit of meta-data
+// and Ticket data, plus IO calls.
 function getTickets(start_time)
 {
-	client.tickets.incremental(start_time, function (err, statusList, body, responseList, resultList) 
+	client.tickets.incremental(start_time, function (err, statusList, body, 
+		responseList, resultList) 
 	{
 		if (err) 
 		{
@@ -114,25 +127,33 @@ function getTickets(start_time)
 			return;
 		}
 
+		var users        = resultList.users || [];	
+		var users_dict   = {};	
+		var groups       = resultList.groups || [];
+		var groups_dict  = {};
 		var init_tickets = resultList.tickets || [];
 		var start_time   = resultList.start_time || 0;
-		var end_time     = resultList.end_time || Metadata.start_time;
+		var end_time     = resultList.end_time;
 
-		// We have a debug mode to simulate Tickets being added over time.
-		if (debug)
-		{
-			var length = debug_heartbeats * 5;
-			if (length+5 > init_tickets.length)
-				init_tickets = [];
-			else
-				init_tickets = init_tickets.slice(length, length+5);
-			debug_heartbeats++;
-		}
+		// We don't store User or Group data for now, just retrieve them using
+		// side-loading.
+		users.forEach((user) => {
+			users_dict[user.id] = user;
+		});
 
-		delete_tickets = [];
-		tickets = [];
+		groups.forEach((user) => {
+			groups_dict[user.id] = user;
+		});
+
+		var delete_tickets = [];
+		var tickets = [];
+
+		console.log("API call returned #", init_tickets.length, "tickets.");
 
 		init_tickets.forEach(function (ticket) {
+			ticket.requester = users_dict[ticket.requester_id].name;
+			ticket.group     = groups_dict[ticket.group_id].name;
+
 			TicketManager.getTicket(ticket, function (err, ticket, index) {
 				if (!err) delete_tickets.push(ticket.id);
 			});
@@ -141,15 +162,9 @@ function getTickets(start_time)
 			});
 		});
 
-		// We have a debug mode to simulate Tickets being added over time.
-		if (debug)
-		{
-			Metadata.start_time = Metadata.start_time;
-		}
-		else
-		{
-			Metadata.start_time = end_time;
-		}
+		// There's an error here with the Incremental Time and using end_time.
+		// TODO: Fix it.
+		Metadata.start_time = end_time;
 		
 		if (tickets.length > 0)
 		{
@@ -165,10 +180,12 @@ function getTickets(start_time)
 	});
 }
 
-// Get all Tickets since the last time server.js was run
+// We run an initial call. Note: the first time the server is run, the start
+// time will be 0, to ensure the TicketManager is populated.
 getTickets(Metadata.start_time);
 
-// Setup a heartbeat that ensures we never exceed Zendesk RATE limit
+// We create a server heartbeat to check for new tickets based on our Zendesk
+// rate limit.
 var heart = heartbeats.createHeart(RATE);
 heart.createEvent(1, function(heartbeat, last) 
 {

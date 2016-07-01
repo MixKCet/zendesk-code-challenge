@@ -9,10 +9,10 @@ https://nodejs.org/en/download/
 ### Git CLONE
 We assume a working knowledge of git! 
 
-### Run NPM INSTALL and then NPM BUILD
+### Run NPM INSTALL and then NPM RUN BUILD
 In the app's root directory, on the command line, run NPM INSTALL. This will populate the node_modules directory with any dependencies the app has.
 
-Once done, run NPM BUILD. This will run a test suite, and compile the scripts for execution.
+Once done, run NPM RUN BUILD. This will run a test suite, and compile the scripts for execution.
 
 ### NPM START
 Once the installation of node modules is complete and the tests have run, the 'NPM START --' command will run the 'server.js' file. Consider appending & to run this in the background.
@@ -51,3 +51,7 @@ This is where I explain error handling, traces, faults, etc.
 
 ### Scalability vs Complexity
 I talk briefly about allowing for room to expand the app vs cluttering it, and obfuscating its purpose.
+
+# TODO
+* Sideload Data
+* Write more Tests

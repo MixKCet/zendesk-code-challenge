@@ -6,6 +6,13 @@ var default_JSON = {
 
 var filePath = './storage/Metadata.json';
 
+// This Metadata model is designed to store persistent data relevant to the
+// running of the server.
+//
+// It's currently only used to store start_time, which is the update_time of
+// the last saved Ticket, as returned by the Zendesk API.
+//
+// This is used to ensure Tickets are never skipped (duplication is fine).
 function Metadata() {
 	try
 	{

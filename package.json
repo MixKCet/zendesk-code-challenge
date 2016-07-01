@@ -4,7 +4,7 @@
 	"description": "A Zendesk ticket retriever app for the Melbourne Zendesk Internship Challenge 2016.",
 	"scripts": 
 	{
-		"browserify": "browserify app.js -o public/js/bundle.js",
+		"browserify": "watchify app.js -o public/js/bundle.js",
 		"test": "jest --bail",
 	    "build": "npm run test && npm run browserify",
     	"clean": "rimraf dist",

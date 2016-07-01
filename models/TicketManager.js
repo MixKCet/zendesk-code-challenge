@@ -3,6 +3,19 @@ var fs = require('fs');
 var default_JSON = {storage: {}, index: []};
 var filePath = './storage/Tickets.json';
 
+// This TicketManager model is designed to store Tickets from a Zendesk
+// Incremental API in two ways:
+// - key/value store, for quick lookup
+// - and sorted index, for client processing
+//
+// Our current use case dictates that a Ticket is only added when it is:
+// 1. retrieved from the Zendesk API
+// 2. doesn't exist in our storage OR
+// 3. is different in created_at or updated_at (it has been recreated / updated)
+//
+// This enables us to maintain the index as a 'most recently added' index
+// with little overhead, while still serving its purpose as an index sorted
+// on new updates.
 function TicketManager() {
 	try
 	{
@@ -79,6 +92,9 @@ TicketManager.prototype.removeTicket = function(ticketID, callback) {
 
 TicketManager.prototype.modifyTicket = function(ticketID, ticket, callback) {
 	return this.removeTicket(ticketID, function(err) {
+		// We ignore removeTicket errors, as we don't care whether
+		// it already existed in storage. If it didn't, we add it
+		// now regardless.
 		return this.addTicket(ticket, function(err) {
 			if (err)
 			{
@@ -89,6 +105,15 @@ TicketManager.prototype.modifyTicket = function(ticketID, ticket, callback) {
 	});
 };
 
+// The loadMore function takes two parametres:
+// @last_TicketID either -1 or a valid Ticket ID
+// @pageSize the # of Tickets to retrieve
+//
+// It will generate errors if an invalid Ticket ID is given (that isn't the -1 
+// use case) or if there aren't any Tickets to give.
+//
+// If the # of Tickets retrieved is less than the pageSize, they'll be returned
+// without an error.
 TicketManager.prototype.loadMore = function(last_ticketID, pageSize, callback) {
 	var index;
 	if (last_ticketID == -1)
@@ -100,7 +125,8 @@ TicketManager.prototype.loadMore = function(last_ticketID, pageSize, callback) {
 		index = this.getIndex(last_ticketID);
 		if (index == -1)
 		{
-			var err = new Error("Cannot use non-existant ticketID as point of reference.");
+			var err = new Error("Cannot use non-existant ticketID as point of \
+				reference.");
 			return callback(err);
 		}
 	}
@@ -119,9 +145,11 @@ TicketManager.prototype.loadMore = function(last_ticketID, pageSize, callback) {
 	}
 
 	var self = this;
-	var tickets = this.data.index.slice(start, end).reverse().map(function (ticketID) {
-		return self.data.storage[ticketID];
-	});
+	var tickets = this.data.index.slice(start, end).reverse()
+		.map(function (ticketID) {
+			return self.data.storage[ticketID];
+		}
+	);
 
 	return callback(null, tickets);
 };

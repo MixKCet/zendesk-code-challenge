@@ -48,7 +48,7 @@ module.exports = ZendeskApp = React.createClass({
 		else
 			last_ticket = this.state.tickets.slice(-1)[0];
 
-		var data = { ticketID: last_ticket.id, pageSize: 25 };
+		var data = { ticketID: last_ticket.id, pageSize: 15 };
 
 		var socket = io.connect();
 		socket.emit("requestMore", data);
@@ -83,7 +83,8 @@ module.exports = ZendeskApp = React.createClass({
 		var self = this;
 		setTimeout(function() 
 		{
-			self.setState({tickets: current_tickets, paging_bot: false});
+			self.setState({ paging_bot: false });
+			self.setState({ tickets: current_tickets });
 		}, 2000);
 	},
 
@@ -91,15 +92,29 @@ module.exports = ZendeskApp = React.createClass({
 		this.setState({no_more_tickets: true, paging_bot: false});
 	},
 
-	checkWindowScroll: function() {
+	atBottom: function () {
 		var at_bottom = false;
-		if($(window).scrollTop() + $(window).height() == $(document).height()) {
+		if($(window).scrollTop() + $(window).height() + 100 >= $(document).height()) {
 			at_bottom = true;
 		}
+		console.log("at bottom", at_bottom);
+		return at_bottom;
+	},
 
-		if (at_bottom && this.state.tickets.length >= 10 && this.state.no_more_tickets != true && this.state.paging_bot != true) 
+	checkWindowScroll: function() {
+		var at_bottom = this.atBottom();
+		console.log("checking window scroll");
+
+		if (at_bottom && this.state.no_more_tickets != true && this.state.paging_bot != true) 
 		{
 			this.requestMore();
+		}
+	},
+
+	componentDidUpdate: function(prevProps, prevState) {
+		if (prevState.paging_bot == true && this.state.paging_bot != true)
+		{
+			this.checkWindowScroll();
 		}
 	},
 
@@ -130,6 +145,7 @@ module.exports = ZendeskApp = React.createClass({
 		socket.on('deleteTicket', (ticketID) => { self.deleteTicket(ticketID); });
 
 		window.addEventListener('scroll', this.checkWindowScroll);
+		this.checkWindowScroll();
 	},
 
 	render: function()
