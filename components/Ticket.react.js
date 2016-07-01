@@ -28,9 +28,6 @@ module.exports = Ticket = React.createClass({
       status_class = "label-danger";
     }
 
-    var created_at = new CustomDate(ticket.created_at);
-    var updated_at = new CustomDate(ticket.updated_at);
-
     return (
       <tr data-toggle="collapse" data-target={"#collapse_" + ticket.id} className="accordian-toggle row-data border-bottom-round">
         <th scope="row" className="border-bottom-left">{ticket.id}</th>
@@ -41,8 +38,8 @@ module.exports = Ticket = React.createClass({
         </td>
         <td>{ticket.subject}</td>
         <td>{ticket.requester}</td>
-        <td>{created_at.getPrettyString()}</td>
-        <td>{updated_at.getPrettyString()}</td>
+        <td>{CustomDate.getPrettyString(ticket.created_at)}</td>
+        <td>{CustomDate.getPrettyString(ticket.updated_at)}</td>
         <td className="border-bottom-right">{ticket.group}</td>
       </tr>
     )

@@ -1,5 +1,5 @@
-function CustomDate(date_string) {
-	this.JS_Date = new Date(date_string);
+function CustomDate() {
+
 };
 
 var DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -10,7 +10,7 @@ CustomDate.daysBetween = function( date1, date2 ) {
 	var date1_ms = date1.getTime();
 	var date2_ms = date2.getTime();
 
-	var difference_ms = date2_ms - date1_ms;
+	var difference_ms =  Math.sqrt(Math.pow(date2_ms - date1_ms, 2));
 
 	return Math.round(difference_ms/one_day); 
 };
@@ -21,7 +21,7 @@ CustomDate.minsBetween = function( date1, date2 ) {
 	var date1_ms = date1.getTime();
 	var date2_ms = date2.getTime();
 
-	var difference_ms = date2_ms - date1_ms;
+	var difference_ms = Math.sqrt(Math.pow(date2_ms - date1_ms, 2));
 
 	return Math.round(difference_ms / one_minute); 
 };
@@ -32,7 +32,7 @@ CustomDate.getDateString = function(date) {
 	{
 		day = "0" + day;
 	}
-	var month = date.getMonth();
+	var month = date.getMonth() + 1;
 	if (month < 10)
 	{
 		month = "0" + month;
@@ -56,9 +56,11 @@ CustomDate.getTimeString = function(date) {
 	return hour + ":" + minutes;
 };
 
-CustomDate.prototype.getPrettyString = function() {
-	var now = new Date();
-	var min_difference = CustomDate.minsBetween(this.JS_Date, now);
+CustomDate.getPrettyString = function(date, now) {
+	date = new Date(date);
+	var now = (now) ? new Date(now) : new Date();
+
+	var min_difference = CustomDate.minsBetween(date, now);
 	if (min_difference < 1)
 	{
 		return "less than a minute ago";
@@ -69,7 +71,7 @@ CustomDate.prototype.getPrettyString = function() {
 		return min_difference + " minutes ago";
 	}
 
-	var day_difference = CustomDate.daysBetween(this.JS_Date, now);
+	var day_difference = CustomDate.daysBetween(date, now);
 	var day = "";
 	if (day_difference == 0)
 	{
@@ -77,13 +79,13 @@ CustomDate.prototype.getPrettyString = function() {
 	}
 	else if (day_difference < 7)
 	{
-		day = DOW[this.JS_Date.getDay()];
+		day = DOW[date.getDay()];
 	}
 	else
 	{
-		day = CustomDate.getDateString(this.JS_Date);
+		day = CustomDate.getDateString(date);
 	}
-	return day + " " + CustomDate.getTimeString(this.JS_Date);
+	return day + " " + CustomDate.getTimeString(date);
 };
 
 module.exports = CustomDate;
