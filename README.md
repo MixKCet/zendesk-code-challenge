@@ -53,5 +53,6 @@ This is where I explain error handling, traces, faults, etc.
 I talk briefly about allowing for room to expand the app vs cluttering it, and obfuscating its purpose.
 
 # TODO
-* Sideload Data
 * Write more Tests
+* Specifically: CustomDate + React Modules
+* Explain / Justify Design
