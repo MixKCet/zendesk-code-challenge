@@ -3,14 +3,12 @@ A client + server node app for accessing Tickets from the Zendesk API and storin
 
 # Installation & Running
 ### Install Node.JS
-This app has been tested on v4.4.6 of Node.js. You can find a binary for your OS here:
-
+This app has been tested on v4.4.6 of Node.js. You can find a binary for your OS here:  
 https://nodejs.org/en/download/
 
 ### Git CLONE
-See the following links for information on using git and cloning this repo:
-
-https://git-scm.com/docs/git-clone 
+See the following links for information on using git and cloning this repo:  
+https://git-scm.com/docs/git-clone  
 https://help.github.com/articles/cloning-a-repository/
 
 ### Run NPM INSTALL and then NPM RUN BUILD
