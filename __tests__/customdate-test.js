@@ -1,7 +1,5 @@
 jest.unmock('../models/CustomDate');
 
-import TicketManager from '../models/CustomDate';
-
 describe('CustomDate', () => {
 	it('can calculate the days between dates', () => {
 		const CustomDate = require('../models/CustomDate');

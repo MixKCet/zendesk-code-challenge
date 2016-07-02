@@ -1,7 +1,5 @@
 jest.unmock('../models/TicketManager');
 
-import TicketManager from '../models/TicketManager';
-
 describe('TicketManager', () => {
 	beforeEach( () => {
 		const TicketManager = require('../models/TicketManager');
