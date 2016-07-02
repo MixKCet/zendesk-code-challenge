@@ -1,5 +1,5 @@
 # zendesk-code-challenge
-A client + server node app for accessing Tickets from the Zendesk API and storing them in a memory, with backups on disk.
+A client + server Node.js app for accessing Tickets from the Zendesk API and storing them in a memory, with backups on disk.
 
 # Installation & Running
 ### Install Node.JS
@@ -64,6 +64,3 @@ The testing framework I used was Jest. It ensures correct functionality of our m
 
 ### Error Handling
 The app uses error-first callbacks to ensure non-blocking flow.
-
-# Outstanding Bugs & Errors
-There's one bug remaining. After a Ticket is updated, if the Server is querying the most recent Tickets, it will update, and then receive a 422 response. This occurs for a couple of minutes and then fixes itself. It's possible there's timestamp / clock shenanigans, but I didn't have time to investigate.
