@@ -63,11 +63,4 @@ This storage solution doesn't scale, which is partly what motivated a move from 
 The testing framework I used was Jest. It ensures correct functionality of our models, and is a great choice for future testing on the React modules.
 
 ### Error Handling
-<<<<<<< HEAD
 The app uses error-first callbacks to ensure non-blocking flow.
-=======
-The app uses error-first callbacks to ensure non-blocking flow.
-
-# Outstanding Bugs & Errors
-There's one bug remaining. After a Ticket is updated, if the Server is querying the most recent Tickets, it will update, and then receive a 422 response. This occurs for a couple of minutes and then fixes itself. It's possible there's timestamp / clock shenanigans, but I didn't have time to investigate.
->>>>>>> 6e9e7a2d06d7717d6fd415a03058fde6f27da5ae
