@@ -97,13 +97,11 @@ module.exports = ZendeskApp = React.createClass({
 		if($(window).scrollTop() + $(window).height() + 100 >= $(document).height()) {
 			at_bottom = true;
 		}
-		console.log("at bottom", at_bottom);
 		return at_bottom;
 	},
 
 	checkWindowScroll: function() {
 		var at_bottom = this.atBottom();
-		console.log("checking window scroll");
 
 		if (at_bottom && this.state.no_more_tickets != true && this.state.paging_bot != true) 
 		{
